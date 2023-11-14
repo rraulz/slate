@@ -1,4 +1,4 @@
-package panel
+package domain
 
 type Panel struct {
 	Id   int

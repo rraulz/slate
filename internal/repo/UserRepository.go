@@ -1,13 +1,14 @@
-package user
+package repo
 
 import (
 	"context"
-	"slate/api/database"
+	"slate/internal/databasePool"
+	"slate/internal/domain"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func CreateUser(ctx context.Context, pg *database.DB, user User) error {
+func CreateUser(ctx context.Context, pg *databasePool.DB, user domain.User) error {
 
 	query := `INSERT INTO "user" (id, username, password, email) VALUES (@id, @username, @password, @email)`
 	args := pgx.NamedArgs{
@@ -24,7 +25,7 @@ func CreateUser(ctx context.Context, pg *database.DB, user User) error {
 	return nil
 }
 
-func GetUsers(ctx context.Context, pg *database.DB) ([]User, error) {
+func GetUsers(ctx context.Context, pg *databasePool.DB) ([]domain.User, error) {
 
 	query := `SELECT * FROM public."user"`
 	rows, err := pg.FetchRows(ctx, query)
@@ -33,5 +34,10 @@ func GetUsers(ctx context.Context, pg *database.DB) ([]User, error) {
 	}
 	defer rows.Close()
 
-	return pgx.CollectRows(rows, pgx.RowToStructByName[User])
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.User])
+}
+
+func GetUserByUsername(ctx context.Context, pg *databasePool.DB) (*domain.User, error) {
+
+	return nil, nil
 }

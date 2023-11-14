@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"slate/api/controller"
-	"slate/api/database"
+	"slate/internal/controller"
+	"slate/internal/databasePool"
 	"slate/templates/login"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	pgInstance, err := database.NewPG(ctx, "host=localhost dbname=postgres user=postgres password=postgres")
+	pgInstance, err := databasePool.NewPG(ctx, "host=localhost dbname=postgres user=postgres password=postgres")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
