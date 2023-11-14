@@ -2,36 +2,17 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"slate/internal/controller"
-	"slate/internal/databasePool"
-	"slate/templates/login"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/labstack/echo/v4"
+	"log"
 )
 
 func main() {
 	ctx := context.Background()
-	pgInstance, err := databasePool.NewPG(ctx, "host=localhost dbname=postgres user=postgres password=postgres")
+	// Initialize the application
+	srv, err := InitializeApp(ctx, "")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalf("Failed to initialize app: %v", err)
 	}
-	defer pgInstance.Close()
 
-	e := echo.New()
-	e.Static("/assets", "assets")
-
-	// Routes
-	e.GET("/", func(c echo.Context) error {
-		component := login.Page()
-		return component.Render(ctx, c.Response().Writer)
-	})
-
-	e.POST("/login", controller.LoginHandler)
-
-	// Start server
-	e.Logger.Fatal(e.Start(":1323"))
+	// Start the server
+	srv.Start()
 }

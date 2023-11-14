@@ -9,11 +9,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type DB struct {
+type Database struct {
 	pgxPool *pgxpool.Pool
 }
 
-func NewPG(ctx context.Context, connString string) (pgInstance *DB, err error) {
+func NewDatabase(ctx context.Context, connString string) (pgInstance *Database, err error) {
 
 	var db *pgxpool.Pool
 	var pgOnce sync.Once
@@ -23,22 +23,22 @@ func NewPG(ctx context.Context, connString string) (pgInstance *DB, err error) {
 		if err != nil {
 			return
 		}
-		pgInstance = &DB{db}
+		pgInstance = &Database{db}
 	})
 	return
 }
 
-func (pg *DB) Ping(ctx context.Context) error {
+func (pg *Database) Ping(ctx context.Context) error {
 	return pg.pgxPool.Ping(ctx)
 }
 
-func (pg *DB) Close() {
+func (pg *Database) Close() {
 	pg.pgxPool.Close()
 }
 
 ///////////////////
 
-func (pg *DB) InsertRow(ctx context.Context, query string, args pgx.NamedArgs) error {
+func (pg *Database) InsertRow(ctx context.Context, query string, args pgx.NamedArgs) error {
 
 	_, err := pg.pgxPool.Exec(ctx, query, args)
 	if err != nil {
@@ -47,7 +47,7 @@ func (pg *DB) InsertRow(ctx context.Context, query string, args pgx.NamedArgs) e
 	return nil
 }
 
-func (pg *DB) FetchRows(ctx context.Context, query string) (rows pgx.Rows, err error) {
+func (pg *Database) FetchRows(ctx context.Context, query string) (rows pgx.Rows, err error) {
 
 	rows, err = pg.pgxPool.Query(ctx, query)
 	if err != nil {
