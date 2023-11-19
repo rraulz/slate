@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"fmt"
 	"slate/internal/databasePool"
 	"slate/internal/domain"
 
@@ -11,13 +10,17 @@ import (
 
 type UserRepo struct {
 	database *databasePool.Database
+	ctx      context.Context
 }
 
-func NewUserRepo(database *databasePool.Database) *UserRepo {
-	return &UserRepo{database}
+func NewUserRepo(database *databasePool.Database, ctx context.Context) *UserRepo {
+	return &UserRepo{
+		database: database,
+		ctx:      ctx,
+	}
 }
 
-func CreateUser(ctx context.Context, pg *databasePool.Database, user domain.User) error {
+func (userRepo *UserRepo) CreateUser(user domain.User) error {
 
 	query := `INSERT INTO "user" (id, username, password, email) VALUES (@id, @username, @password, @email)`
 	args := pgx.NamedArgs{
@@ -27,17 +30,17 @@ func CreateUser(ctx context.Context, pg *databasePool.Database, user domain.User
 		"email":    user.Email,
 	}
 
-	err := pg.InsertRow(ctx, query, args)
+	err := userRepo.database.InsertRow(userRepo.ctx, query, args)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetUsers(ctx context.Context, pg *databasePool.Database) ([]domain.User, error) {
+func (userRepo *UserRepo) GetUsers() ([]domain.User, error) {
 
 	query := `SELECT * FROM public."user"`
-	rows, err := pg.FetchRows(ctx, query)
+	rows, err := userRepo.database.FetchRows(userRepo.ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +49,16 @@ func GetUsers(ctx context.Context, pg *databasePool.Database) ([]domain.User, er
 	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.User])
 }
 
-func (u *UserRepo) GetUserByUsername() (*domain.User, error) {
-	return nil, fmt.Errorf("not implemented")
+func (userRepo *UserRepo) GetUserByUsername(username string) (*domain.User, error) {
+
+	query := `SELECT * FROM public."user" WHERE username = $1`
+	row := userRepo.database.QueryRow(userRepo.ctx, query, username)
+
+	user := &domain.User{}
+	err := row.Scan(&user.Id, &user.Username, &user.Password, &user.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

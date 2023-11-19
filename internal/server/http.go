@@ -2,28 +2,26 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"slate/internal/router"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	Echo *echo.Echo
-	Ctx  context.Context
+	Gin *gin.Engine
 }
 
 func NewHTTPServer(ctx context.Context, apiRouter *router.APIRouter) *Server {
 
-	e := echo.New()
-	e.Static("/assets", "assets")
-	apiRouter.RegisterRouters(e, ctx)
+	g := gin.Default()
+	g.HTMLRender = &TemplRender{}
+	// rand.Static("/assets", "assets")
 
-	fmt.Println("Server initialized")
+	apiRouter.RegisterRouters(g)
 
-	return &Server{e, ctx}
+	return &Server{g}
 }
 
 func (s *Server) Start() {
-	s.Echo.Logger.Fatal(s.Echo.Start(":1323"))
+	s.Gin.Run(":42069")
 }

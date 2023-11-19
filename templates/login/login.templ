@@ -11,7 +11,7 @@ templ Page() {
 			<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png"/>
 			<link rel="manifest" href="/assets/favicon/site.webmanifest"/>
-      <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.8"></script>
 			// <script src="/assets/js/htmx.min.js"></script>
 		</head>
 		<body class="bg-gray-100">
@@ -24,23 +24,24 @@ templ Page() {
 			</header>
 			<section class="section">
 				<div class="container">
-							@loginForm()
+					@LoginForm("zz", "12345", "")
 				</div>
 			</section>
 		</body>
 	</html>
 }
 
-templ loginForm() {
-  <div>
-	<form id="loginForm" hx-post="/login" hx-target="#message" hx-swap="innerHTML" hx-push-url="false">
-  <label for="username">User</label>
-  <input type="text" id="username" name="username" value="root"/>
-  <label for="password">Password</label>
-  <input type="password" id="password" name="password" value="12345"/>
-  <input type="submit" value="Submit"/>
-  </form>
-
-  <div id="message"></div>
-  </div> 
+templ LoginForm(name string, password string, errorMessage string) {
+	<div>
+		<form id="loginForm" hx-post="/login"  hx-swap="outerHTML" hx-push-url="false">
+			<label for="username">User</label>
+			<input type="text" id="username" name="username" value={name}/>
+			<label for="password">Password</label>
+			<input type="password" id="password" name="password" value="1"/>
+			<input type="submit" value="Submit"/>
+		</form>
+		if errorMessage != "" {
+			<div id="message" style="background-color:red;">{errorMessage}</div>
+		}
+	</div>
 }

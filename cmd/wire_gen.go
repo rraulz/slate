@@ -23,9 +23,10 @@ func InitializeApp(ctx context.Context, connString string) (*server.Server, erro
 	if err != nil {
 		return nil, err
 	}
-	userRepo := repo.NewUserRepo(database)
+	userRepo := repo.NewUserRepo(database, ctx)
 	userService := service.NewUserService(userRepo)
-	userController := controller.NewUserController(userService)
+	authService := service.NewAuthService(userService)
+	userController := controller.NewUserController(userService, authService)
 	apiRouter := router.NewAPIRouter(userController)
 	serverServer := server.NewHTTPServer(ctx, apiRouter)
 	return serverServer, nil

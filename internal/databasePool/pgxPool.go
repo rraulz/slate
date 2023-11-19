@@ -10,7 +10,7 @@ import (
 )
 
 type Database struct {
-	pgxPool *pgxpool.Pool
+	PgxPool *pgxpool.Pool
 }
 
 func NewDatabase(ctx context.Context, connString string) (pgInstance *Database, err error) {
@@ -21,26 +21,35 @@ func NewDatabase(ctx context.Context, connString string) (pgInstance *Database, 
 	pgOnce.Do(func() {
 		db, err = pgxpool.New(ctx, connString)
 		if err != nil {
+			fmt.Println("Unable to connect to database")
 			return
 		}
+
+		err = db.Ping(ctx)
+		if err != nil {
+			fmt.Println("Unable to ping database", err)
+			return
+		}
+		fmt.Println("Database connected")
+
 		pgInstance = &Database{db}
 	})
 	return
 }
 
 func (pg *Database) Ping(ctx context.Context) error {
-	return pg.pgxPool.Ping(ctx)
+	return pg.PgxPool.Ping(ctx)
 }
 
 func (pg *Database) Close() {
-	pg.pgxPool.Close()
+	pg.PgxPool.Close()
 }
 
 ///////////////////
 
 func (pg *Database) InsertRow(ctx context.Context, query string, args pgx.NamedArgs) error {
 
-	_, err := pg.pgxPool.Exec(ctx, query, args)
+	_, err := pg.PgxPool.Exec(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("unable to insert row: %w", err)
 	}
@@ -49,9 +58,13 @@ func (pg *Database) InsertRow(ctx context.Context, query string, args pgx.NamedA
 
 func (pg *Database) FetchRows(ctx context.Context, query string) (rows pgx.Rows, err error) {
 
-	rows, err = pg.pgxPool.Query(ctx, query)
+	rows, err = pg.PgxPool.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("unable to query users: %w", err)
 	}
 	return
+}
+
+func (pg *Database) QueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {
+	return pg.PgxPool.QueryRow(ctx, query, args...)
 }

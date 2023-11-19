@@ -1,11 +1,11 @@
 package router
 
 import (
-	"context"
+	"net/http"
 	"slate/internal/controller"
 	"slate/templates/login"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 type APIRouter struct {
@@ -18,15 +18,16 @@ func NewAPIRouter(userController *controller.UserController) *APIRouter {
 	}
 }
 
-func (a *APIRouter) RegisterRouters(e *echo.Echo, ctx context.Context) {
+func (a *APIRouter) RegisterRouters(g *gin.Engine) {
 
 	// Routes
-	e.GET("/", func(c echo.Context) error {
-		component := login.Page()
-		return component.Render(ctx, c.Response().Writer)
+	g.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "", login.Page())
 	})
 
-	e.POST("/login", a.userController.LoginUser)
+	// g.POST("/login", a.userController.LoginUserController)
+	g.POST("/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "", login.LoginForm("aasd", "aas", "aasd"))
+	})
 
-	// Start server
 }
